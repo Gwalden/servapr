@@ -21,3 +21,7 @@
    Le deuxième client n'arrive pas à ce connecter car la fonction accept utilisé
    par la socket pour accepter les connections est bloquante. Tant que le
    premier client ne sera pas déconnecté, le deuxième ne pourra pas se connecter.
+
+
+
+Attention, mettre en plein écran pour que le message s'affiche correctement.
