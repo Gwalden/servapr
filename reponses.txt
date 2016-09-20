@@ -1,0 +1,23 @@
+3.2.1 Test de votre programme
+
+1. Quittez votre serveur et relancez le. Que se passe-t-il?
+
+   Message d'erreur : Address already in use.
+   Il faut attendre quelques instant avant de pouvoir le relancer.
+
+2. Ajouter un petit délai avant l'envoi du message de bienvenue.
+   Puis exécutez la commande suivante: nc -z 127.0.0.1 8080. Que se passe-t-il?
+
+   Le serveur plante car le client se déconnecte avant de recevoir le message
+   de bienvenue.
+
+3. Exécutez la commande suivante: telnel ::1 8080. Que ce passe-t-il ? Pourquoi?
+
+   Le terminal affiche une erreur telnet car ::1 correspond à une adresse de type
+   IPv6 et que la socket est configuré pour des connections IPv4.
+
+4. Lancez deux clients simultanément. Que se passe-t-il? Pourquoi?
+
+   Le deuxième client n'arrive pas à ce connecter car la fonction accept utilisé
+   par la socket pour accepter les connections est bloquante. Tant que le
+   premier client ne sera pas déconnecté, le deuxième ne pourra pas se connecter.
