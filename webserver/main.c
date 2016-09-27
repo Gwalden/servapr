@@ -7,9 +7,18 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <signal.h>
 
+
+void initialiser_signaux() {
+  if ( signal ( SIGPIPE , SIG_IGN ) == SIG_ERR )
+    {
+      perror ( " signal " );
+    }
+}
 int main()
 {
+  initialiser_signaux();
   int s = creer_serveur(8080);
 
   int socket_client;
