@@ -16,29 +16,36 @@ void initialiser_signaux() {
       perror ( " signal " );
     }
 }
+
 int main()
 {
   initialiser_signaux();
   int s = creer_serveur(8080);
-
   int socket_client;
-  socket_client = accept(s, NULL, NULL);
-
-  if (socket_client == -1)
-    {
-      perror("accept");
-      /*   traitement d'erreur*/
-      return -1;
-    }
-  int fd = open("../bienvenue", O_RDONLY);
-  char c[1024];
-  int ret;
-  while (( ret= read(fd, &c, 1024)) > 0)
-    write(socket_client, &c , ret);
   while (1)
     {
-      while ((ret = read(socket_client, &c,1024)) > 0)
-	write(socket_client, &c, ret);
+      socket_client = accept(s, NULL, NULL); 
+      if (socket_client == -1)
+	{
+	  perror("accept");
+	  /*   traitement d'erreur*/
+	  return -1;
+	}
+      int pid = fork();
+      if (pid == 0)
+      	{
+	      int fd = open("../bienvenue", O_RDONLY);
+	      char c[1024];
+	      int ret;
+	      while (( ret= read(fd, &c, 1024)) > 0)
+		write(socket_client, &c , ret);
+	      while ((ret = read(socket_client, &c,1024)) > 0)
+		write(socket_client, &c, ret);
+	    }
+	  else 
+	    {
+	      close(socket_client);
+	    }
     }
-  return 0;
+      return 0;
 }
