@@ -1,3 +1,5 @@
+Attention, mettre en plein écran pour que le message s'affiche correctement.
+
 3.2.1 Test de votre programme
 
 1. Quittez votre serveur et relancez le. Que se passe-t-il?
@@ -24,4 +26,20 @@
 
 
 
-Attention, mettre en plein écran pour que le message s'affiche correctement.
+5.2.1 Manipulations préliminaires
+
+1. Modifier votre programme pour qu'il ne transmette plus rien au client et qu'il
+   affiche sur sa sortie standard les données envoyées par le client.
+
+2. Lancez la commande $ curl http://localhost:8080/
+
+3. Quel est le message envoyé par le client web ?
+
+   
+
+4. A l'aide de la RFC, trouver le nom donné aux trois constituant de la première
+   ligne de la requête envoyé par le client.
+
+
+
+
