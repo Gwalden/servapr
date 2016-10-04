@@ -35,14 +35,42 @@ void initialiser_signaux() {
     }
 }
 
-void envoi_client_serv(char *buf, FILE* file)
+
+void check_buf(char *buf)
 {
-  while ((buf = fgets(buf, 1024, file)) != NULL)
+  int i = 0;
+  int w = 0;
+  while (buf[i]) {
+    if (buf[i] == ' ')
+      w++;
+    i++;
+  }
+  if (w == 2)
     {
-      fprintf(file,"<Servapr> %s", buf);
-      fflush(file);
+      i= 0;
+      char prems[3] = "";
+      for ( ; i <= 2; i++)
+	prems[i] = buf[i];
+      i = 4;
+      if (strncmp(prems, "GET", 3) == 0)
+	{
+	  for (; buf[i] != ' ' ;i++);
+	  char ht[8];
+	  int k = 0;
+	  i++;
+	  for (; k < 8; i++)
+	    ht[k++] = buf[i];
+	   printf("%s",ht);
+	  if (strncmp(ht,"HTTP/1.",7) == 0)
+	    {
+	      i++;
+	      if (buf[i] == '1' || buf[i] == '0')
+		printf("BRAAAAAAAAAAAVO");
+	    }
+	}
     }
 }
+
 
 int main()
 {
@@ -70,7 +98,12 @@ int main()
 	  char c[1024];
 	  while (( ret= read(fd, &c, 1024)) > 0)
 	    write(socket_client, &c , ret);
-	  envoi_client_serv(buff,file);
+	  while ((fgets(buff, 1024, file)) != NULL)
+	    {
+	      check_buf(buff);
+	      printf("<SERVAPR> %s", buff);
+	    }
+
 	  exit(0);
 	}
       else 
