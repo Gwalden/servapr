@@ -35,11 +35,16 @@ Attention, mettre en plein écran pour que le message s'affiche correctement.
 
 3. Quel est le message envoyé par le client web ?
 
-   
+  GET/ HTTP/1.1
+  Host: localhost:8080
+  User-Agent: curl/7.45.0
+  Accept: */*
 
 4. A l'aide de la RFC, trouver le nom donné aux trois constituant de la première
    ligne de la requête envoyé par le client.
 
-
+   GET = Methode
+   HTTP = URI
+   1.1 = Version du protocol  
 
 
