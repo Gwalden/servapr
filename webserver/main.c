@@ -16,7 +16,7 @@ void traitement_signal(int sig)
   int status;
   
   waitpid(-1, &status, WNOHANG);
-  printf("Signal %d reçu \n", sig);  
+  printf("Signal %d recu \n", sig);  
 }
 
 void initialiser_signaux() {
@@ -35,11 +35,22 @@ void initialiser_signaux() {
     }
 }
 
+void envoi_client_serv(char *buf, FILE* file)
+{
+  while ((buf = fgets(buf, 1024, file)) != NULL)
+    {
+      fprintf(file,"<Servapr> %s", buf);
+      fflush(file);
+    }
+}
+
 int main()
 {
   initialiser_signaux();
   int s = creer_serveur(8080);
   int socket_client;
+  FILE *file;
+  
   while (1)
     {
       socket_client = accept(s, NULL, NULL); 
@@ -50,15 +61,16 @@ int main()
 	  return -1;
 	}
       int pid = fork();
+      char buff[1024];
       if (pid == 0)
       	{
+	  file = fdopen(socket_client, "w+");  
 	  int fd = open("../bienvenue", O_RDONLY);
-	  char c[1024];
 	  int ret;
+	  char c[1024];
 	  while (( ret= read(fd, &c, 1024)) > 0)
 	    write(socket_client, &c , ret);
-	  while ((ret = read(socket_client, &c,1024)) > 0)
-	    write(socket_client, &c, ret);
+	  envoi_client_serv(buff,file);
 	  exit(0);
 	}
       else 
