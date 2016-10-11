@@ -19,6 +19,8 @@ void traitement_signal(int sig)
   printf("Signal %d recu \n", sig);  
 }
 
+
+
 void initialiser_signaux() {
   struct sigaction sa;
 
@@ -56,39 +58,41 @@ int check_buf(char *buf)
       i = 4;
       if (strncmp(prems, "GET", 3) == 0)
 	{
-	  for (; buf[i] != ' ' ;i++);
-	  char ht[8];
-	  int k = 0;
-	  i++;
-	  for (; k < 8; i++) {
-	    ht[k] = buf[i];
-	    k++;
-	  }
-	  ht[k] = '\0';
-	  if (strncmp(ht,"HTTP/1.",7) == 0)
+	  if ((buf[i] == '/') && (buf[i + 1] == ' '))
 	    {
-	      if (ht[7] == '1' || ht[7] == '0') {
-		return 1;
-	      } else {
-		return 0;
+	      char ht[8];
+	      int k = 0;
+	      i = i + 2;
+	      for (; k < 8; i++) {
+		ht[k] = buf[i];
+		k++;
 	      }
-	    } else {
-	    return 0;
-	  }
-	} else {
-	return 0;
-      }
-    } else {
-    return 0;
-  }
-}
+	      ht[k] = '\0';
+	      if (strncmp(ht,"HTTP/1.",7) == 0)
+		{
+		  if (ht[7] == '1' || ht[7] == '0') {
+		    return 1;
+		  } 
+		}
+	    }
+	  else
+	    return -1;
 
+	}
+    }
+  return 0;
+}
 void message_erreur() {
   printf("HTTP/1.1 400 Bad Request\r\n");
   printf("Connection: close\r\n");
   printf("Content-Length: 17\r\n");
 }
 
+void message_404() {
+  printf("HTTP/1.1 404 Bad Request\r\n");
+  printf("Connection: close\r\n");
+  printf("Content-Length: 17\r\n");
+}
 
 void message_ok() {
   printf("HTTP/1.1 200 OK\r\n");
@@ -129,14 +133,16 @@ int main()
 		  while (( ret= read(fd, &c, 1024)) > 0)
 		    write(socket_client, &c , ret);
 		  message_ok();
-		} 
+		}
 	      else if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == 0) {
 		message_erreur();
+	      }
+		else if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == -1) {
+		message_404();
 	      }
 	      check = check_buf(buff);
 	      printf("<SERVAPR> %s", buff);	      
 	    }
-
 	  exit(0);
 	}
       else 
