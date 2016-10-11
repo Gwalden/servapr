@@ -36,21 +36,23 @@ void initialiser_signaux() {
 }
 
 
-void check_buf(char *buf)
+int check_buf(char *buf)
 {
   int i = 0;
   int w = 0;
   while (buf[i]) {
-    if (buf[i] == ' ')
+    if (buf[i] == ' ') {
       w++;
+    }
     i++;
   }
   if (w == 2)
     {
       i= 0;
       char prems[3] = "";
-      for ( ; i <= 2; i++)
+      for ( ; i <= 2; i++) {
 	prems[i] = buf[i];
+      }
       i = 4;
       if (strncmp(prems, "GET", 3) == 0)
 	{
@@ -58,19 +60,41 @@ void check_buf(char *buf)
 	  char ht[8];
 	  int k = 0;
 	  i++;
-	  for (; k < 8; i++)
-	    ht[k++] = buf[i];
-	   printf("%s",ht);
+	  for (; k < 8; i++) {
+	    ht[k] = buf[i];
+	    k++;
+	  }
+	  ht[k] = '\0';
 	  if (strncmp(ht,"HTTP/1.",7) == 0)
 	    {
-	      i++;
-	      if (buf[i] == '1' || buf[i] == '0')
-		printf("BRAAAAAAAAAAAVO");
-	    }
-	}
-    }
+	      if (ht[7] == '1' || ht[7] == '0') {
+		return 1;
+	      } else {
+		return 0;
+	      }
+	    } else {
+	    return 0;
+	  }
+	} else {
+	return 0;
+      }
+    } else {
+    return 0;
+  }
 }
 
+void message_erreur() {
+  printf("HTTP/1.1 400 Bad Request\r\n");
+  printf("Connection: close\r\n");
+  printf("Content-Length: 17\r\n");
+}
+
+
+void message_ok() {
+  printf("HTTP/1.1 200 OK\r\n");
+  printf("Connection: close\r\n");
+  printf("Content-Length: 17\r\n");
+}
 
 int main()
 {
@@ -96,12 +120,21 @@ int main()
 	  int fd = open("../bienvenue", O_RDONLY);
 	  int ret;
 	  char c[1024];
-	  while (( ret= read(fd, &c, 1024)) > 0)
-	    write(socket_client, &c , ret);
+	  fgets(buff, 1024, file);
+	  int check = check_buf(buff);
 	  while ((fgets(buff, 1024, file)) != NULL)
 	    {
-	      check_buf(buff);
-	      printf("<SERVAPR> %s", buff);
+	      if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == 1)
+		{
+		  while (( ret= read(fd, &c, 1024)) > 0)
+		    write(socket_client, &c , ret);
+		  message_ok();
+		} 
+	      else if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == 0) {
+		message_erreur();
+	      }
+	      check = check_buf(buff);
+	      printf("<SERVAPR> %s", buff);	      
 	    }
 
 	  exit(0);
