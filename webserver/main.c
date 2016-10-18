@@ -20,24 +20,6 @@ void traitement_signal(int sig)
 }
 
 
-
-void initialiser_signaux() {
-  struct sigaction sa;
-
-  sa.sa_handler = traitement_signal;
-  sigemptyset(&sa.sa_mask);
-  sa.sa_flags = SA_RESTART;
-  if (sigaction(SIGCHLD, &sa, NULL) == -1)
-    {
-      perror("sigaction(SIGCHLD)");
-    }
-  if ( signal ( SIGPIPE , SIG_IGN ) == SIG_ERR )
-    {
-      perror ( " signal " );
-    }
-}
-
-
 int check_buf(char *buf)
 {
   int i = 0;
@@ -77,7 +59,6 @@ int check_buf(char *buf)
 	    }
 	  else
 	    return -1;
-
 	}
     }
   return 0;
@@ -99,6 +80,61 @@ void message_ok() {
   printf("Connection: close\r\n");
   printf("Content-Length: 17\r\n");
 }
+
+
+
+char * fgets_or_exit ( char *buff, int size , FILE *stream) {
+  char *buffer;
+
+  if ((buffer = fgets(buff, size, stream)) == NULL)
+    exit(1);
+  return buffer;
+}
+
+
+void function(char *buff, int size , FILE *file, int fd, char *c, int socket_client)
+{
+  fgets_or_exit(buff,size,file);
+  int check = check_buf(buff);
+  check = check_buf(buff);
+  while (fgets_or_exit(buff, size, file))
+    {
+      if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == 1)
+	{
+	  int ret = 0;
+	  while ((ret = read(fd, &c, 1024)) > 0)
+	    write(socket_client, &c , ret);
+	  message_ok();
+	}
+      else if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == 0) {
+	message_erreur();
+      }
+      else if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == -1) {
+	message_404();
+      }
+      printf("<SERVAPR> %s", buff);	      
+    }
+}
+
+
+void initialiser_signaux() {
+  struct sigaction sa;
+
+  sa.sa_handler = traitement_signal;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = SA_RESTART;
+  if (sigaction(SIGCHLD, &sa, NULL) == -1)
+    {
+      perror("sigaction(SIGCHLD)");
+    }
+  if ( signal ( SIGPIPE , SIG_IGN ) == SIG_ERR )
+    {
+      perror ( " signal " );
+    }
+}
+
+
+
 
 int main()
 {
@@ -122,28 +158,8 @@ int main()
       	{
 	  file = fdopen(socket_client, "w+");  
 	  int fd = open("../bienvenue", O_RDONLY);
-	  int ret;
 	  char c[1024];
-	  fgets(buff, 1024, file);
-	  int check = check_buf(buff);
-	  while ((fgets(buff, 1024, file)) != NULL)
-	    {
-	      if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == 1)
-		{
-		  while (( ret= read(fd, &c, 1024)) > 0)
-		    write(socket_client, &c , ret);
-		  message_ok();
-		}
-	      else if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == 0) {
-		message_erreur();
-	      }
-		else if ((buff[0] == '\n' || (buff[0] == '\r' && buff[1] == '\n')) && check == -1) {
-		message_404();
-	      }
-	      check = check_buf(buff);
-	      printf("<SERVAPR> %s", buff);	      
-	    }
-	  exit(0);
+	  function(buff, 1024, file,fd,c, socket_client);
 	}
       else 
 	{      
